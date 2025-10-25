@@ -1,0 +1,107 @@
+// Views/EventDetailView.swift
+import SwiftUI
+import MapKit
+import SwiftData
+
+struct EventDetailView: View {
+    @StateObject private var vm: EventDetailViewModel
+    @Environment(\.modelContext) private var context
+    // @StateObject private var scheduleVM: ScheduleViewModel
+
+    init(event: TMEvent) {
+        _vm = StateObject(wrappedValue: EventDetailViewModel(event: event))
+        // ScheduleViewModel can't be created without context at init; will be set later
+      //_scheduleVM = StateObject(wrappedValue: ScheduleViewModel( context: <#ModelContext#>))
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                AsyncImage(url: vm.event.images?.first?.url) { phase in
+                    switch phase {
+                    case .empty: Color.gray.frame(height: 220)
+                    case .success(let img): img.resizable().scaledToFill().frame(height: 220).clipped()
+                    case .failure: Color.gray.frame(height: 220)
+                    @unknown default: Color.gray.frame(height: 220)
+                    }
+                }
+
+                Text(vm.event.name).font(.title2).bold().padding(.horizontal)
+
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Date")
+                            .font(.caption).foregroundColor(.secondary)
+                        Text(vm.event.dates.start.localDate ?? "--")
+                    }
+                    Spacer()
+                    if let attractionNames = vm.event.attractions?.compactMap({ $0.name }).joined(separator: ", ") {
+                        VStack(alignment: .leading) {
+                            Text("Artists").font(.caption).foregroundColor(.secondary)
+                            Text(attractionNames).lineLimit(1)
+                        }
+                    }
+                }.padding(.horizontal)
+
+                Divider()
+
+                if let venue = vm.venue {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Venue").font(.headline)
+                        Text(venue.name)
+                        if let addr = venue.address?.line1 { Text(addr) }
+                        if let city = venue.city?.name { Text(city) }
+                        if let postal = venue.postalCode { Text("Postal: \(postal)") }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 6)
+
+                    if let latStr = venue.location?.latitude, let lonStr = venue.location?.longitude,
+                       let lat = Double(latStr), let lon = Double(lonStr) {
+                        MapView(coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon))
+                            .frame(height: 200)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                    }
+                } else {
+                    if vm.isLoadingVenue { ProgressView().padding() }
+                    else { Text("Venue info not available").padding(.horizontal) }
+                }
+
+                HStack {
+                    Button {
+                        // Save to SwiftData
+                        let schedule = ScheduleViewModel(context: context)
+                        schedule.save(event: vm.event)
+                    } label: {
+                        Label("Save Event", systemImage: "bookmark")
+                            .padding()
+                            .background(.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+
+                    Spacer()
+
+                    if let url = vm.event.url {
+                        Link(destination: url) {
+                            Label("Buy Tickets", systemImage: "ticket")
+                                .padding()
+                                .background(.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .onAppear {
+                Task {
+                    await vm.loadFullEvent()
+                }
+            }
+        }
+        .navigationTitle("Event")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
