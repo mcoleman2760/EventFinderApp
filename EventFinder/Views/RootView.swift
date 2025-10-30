@@ -13,7 +13,10 @@ struct RootView: View {
 
           ScheduleView()
                 .tabItem { Label("Schedule", systemImage: "bookmark") }
+          SettingsView()
+                  .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
+      
         .onChange(of: deepLinkHandler.pendingEventId) { oldValue, newValue in
             guard let id = newValue else { return }
             Task {
