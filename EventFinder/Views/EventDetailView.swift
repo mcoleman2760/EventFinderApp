@@ -2,16 +2,17 @@
 import SwiftUI
 import MapKit
 import SwiftData
+import Combine
 
 struct EventDetailView: View {
     @StateObject private var vm: EventDetailViewModel
     @Environment(\.modelContext) private var context
-    // @StateObject private var scheduleVM: ScheduleViewModel
+
+    // We'll hold a view model for schedule tasks
+    @StateObject private var scheduleVMHolder = ScheduleVMHolder()
 
     init(event: TMEvent) {
         _vm = StateObject(wrappedValue: EventDetailViewModel(event: event))
-        // ScheduleViewModel can't be created without context at init; will be set later
-      //_scheduleVM = StateObject(wrappedValue: ScheduleViewModel( context: <#ModelContext#>))
     }
 
     var body: some View {
@@ -19,10 +20,14 @@ struct EventDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 AsyncImage(url: vm.event.images?.first?.url) { phase in
                     switch phase {
-                    case .empty: Color.gray.frame(height: 220)
-                    case .success(let img): img.resizable().scaledToFill().frame(height: 220).clipped()
-                    case .failure: Color.gray.frame(height: 220)
-                    @unknown default: Color.gray.frame(height: 220)
+                    case .empty:
+                        Color.gray.frame(height: 220)
+                    case .success(let img):
+                        img.resizable().scaledToFill().frame(height: 220).clipped()
+                    case .failure:
+                        Color.gray.frame(height: 220)
+                    @unknown default:
+                        Color.gray.frame(height: 220)
                     }
                 }
 
@@ -56,8 +61,10 @@ struct EventDetailView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 6)
 
-                    if let latStr = venue.location?.latitude, let lonStr = venue.location?.longitude,
-                       let lat = Double(latStr), let lon = Double(lonStr) {
+                    if let latStr = venue.location?.latitude,
+                       let lonStr = venue.location?.longitude,
+                       let lat = Double(latStr),
+                       let lon = Double(lonStr) {
                         MapView(coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon))
                             .frame(height: 200)
                             .cornerRadius(12)
@@ -68,40 +75,47 @@ struct EventDetailView: View {
                     else { Text("Venue info not available").padding(.horizontal) }
                 }
 
-                HStack {
-                    Button {
-                        // Save to SwiftData
-                        let schedule = ScheduleViewModel(context: context)
-                        schedule.save(event: vm.event)
-                    } label: {
-                        Label("Save Event", systemImage: "bookmark")
-                            .padding()
-                            .background(.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
+              HStack {
+                  Button {
+                      // Initialize ScheduleViewModel if not already
+                      if scheduleVMHolder.vm == nil {
+                          scheduleVMHolder.vm = ScheduleViewModel(context: context)
+                      }
 
-                    Spacer()
+                      // Toggle save
+                      scheduleVMHolder.vm?.toggle(event: vm.event)
+                  } label: {
+                      let isSaved = scheduleVMHolder.vm?.isSaved(vm.event) ?? false
+                      Label("Save Event", systemImage: isSaved ? "bookmark.fill" : "bookmark")
+                          .padding()
+                          .background(isSaved ? Color.blue : Color.gray.opacity(0.3))
+                          .foregroundColor(.white)
+                          .cornerRadius(10)
+                  }
 
-                    if let url = vm.event.url {
-                        Link(destination: url) {
-                            Label("Buy Tickets", systemImage: "ticket")
-                                .padding()
-                                .background(.green)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                    }
-                }
+                  Spacer()
+
+                  if let url = vm.event.url {
+                      Link(destination: url) {
+                          Label("Buy Tickets", systemImage: "ticket")
+                              .padding()
+                              .background(.green)
+                              .foregroundColor(.white)
+                              .cornerRadius(10)
+                      }
+                  }
+              }
+
                 .padding(.horizontal)
             }
-            .onAppear {
-                Task {
-                    await vm.loadFullEvent()
-                }
-            }
+            .onAppear { Task { await vm.loadFullEvent() } }
         }
         .navigationTitle("Event")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // small holder to avoid creating ScheduleViewModel in init (needs ModelContext)
+    private final class ScheduleVMHolder: ObservableObject {
+        @Published var vm: ScheduleViewModel? = nil
     }
 }

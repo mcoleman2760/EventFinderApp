@@ -1,31 +1,40 @@
-// Views/ScheduleView.swift
 import SwiftUI
 import SwiftData
 
 struct ScheduleView: View {
     @Environment(\.modelContext) private var context
-    @Query(sort: \SavedEvent.date, order: .forward)  var saved: [SavedEvent]
+
+    // vm starts as nil because we cannot create it before we get the modelContext
+    @State private var vm: ScheduleViewModel? = nil
+
+    @Query(sort: \SavedEvent.date, order: .forward) var saved: [SavedEvent]
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(saved) { s in
+                ForEach(saved, id: \.id) { s in
                     VStack(alignment: .leading) {
                         Text(s.name).font(.headline)
-                        Text(s.venueName).font(.subheadline).foregroundColor(.secondary)
-                        Text(s.date, style: .date).font(.caption)
+                        Text(s.venueName).font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Text(s.date, style: .date)
+                            .font(.caption)
                     }
                     .padding(.vertical, 6)
                 }
-                .onDelete { idx in
-                    for i in idx {
-                        let item = saved[i]
-                        context.delete(item)
-                    }
-                    do { try context.save() } catch { context.rollback() }
-                }
+                .onDelete(perform: deleteItems)
             }
             .navigationTitle("My Schedule")
+            .onAppear {
+                // If vm is still nil, now we have modelContext and can create it safely
+                if vm == nil {
+                    _vm.wrappedValue = ScheduleViewModel(context: context)
+                }
+            }
         }
+    }
+
+    private func deleteItems(at offsets: IndexSet) {
+        vm?.delete(at: offsets)
     }
 }

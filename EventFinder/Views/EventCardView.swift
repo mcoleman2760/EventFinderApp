@@ -3,11 +3,17 @@ import SwiftUI
 
 struct EventCardView: View {
     let event: TMEvent
-    @State private var isFavorited = false
-    var onFavoriteToggle: (() -> Void)? = nil
+    @ObservedObject var scheduleVM: ScheduleViewModel   // observe saved events
+
+    // Compute favorite status from ScheduleViewModel
+    private var isFavorited: Bool {
+        scheduleVM.saved.contains(where: { $0.id == event.id })
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+
+            // MARK: Event Image
             AsyncImage(url: event.images?.first?.url) { phase in
                 switch phase {
                 case .empty:
@@ -17,7 +23,10 @@ struct EventCardView: View {
                     }
                     .frame(height: 120)
                 case .success(let img):
-                    img.resizable().scaledToFill().frame(height: 120).clipped()
+                    img.resizable()
+                        .scaledToFill()
+                        .frame(height: 120)
+                        .clipped()
                 case .failure:
                     Color.gray.frame(height: 120)
                 @unknown default:
@@ -25,27 +34,32 @@ struct EventCardView: View {
                 }
             }
 
+            // MARK: Event Name
             Text(event.name)
                 .font(.headline)
                 .lineLimit(2)
 
+            // MARK: Date + Bookmark
             HStack {
                 Text(event.dates.start.localDate ?? "--")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 Spacer()
                 Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
-                        isFavorited.toggle()
-                        onFavoriteToggle?()
+                    if isFavorited {
+                        scheduleVM.delete(event: event)   // remove from saved
+                    } else {
+                        scheduleVM.save(event: event)     // add to saved
                     }
                 } label: {
                     Image(systemName: isFavorited ? "bookmark.fill" : "bookmark")
                         .scaleEffect(isFavorited ? 1.15 : 1.0)
-                        .modifier(CardIconModifier())
+                      
+                        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFavorited)
                 }
             }
 
+            // MARK: Artists
             if let names = event.attractions?.compactMap({ $0.name }).joined(separator: ", "), !names.isEmpty {
                 Text(names)
                     .font(.caption)
@@ -56,9 +70,13 @@ struct EventCardView: View {
         .padding()
         .cardStyle()
     }
-  
-  
-  
 }
 
-
+// MARK: ScheduleViewModel Helper
+extension ScheduleViewModel {
+    func delete(event: TMEvent) {
+        if let index = saved.firstIndex(where: { $0.id == event.id }) {
+            delete(at: IndexSet(integer: index))
+        }
+    }
+}
