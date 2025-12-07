@@ -20,7 +20,9 @@ struct ScheduleView: View {
                         Text(s.date, style: .date)
                             .font(.caption)
                     }
-                    .padding(.vertical, 6)
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(12)
                 }
                 .onDelete(perform: deleteItems)
             }

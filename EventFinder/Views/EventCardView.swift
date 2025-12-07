@@ -54,7 +54,7 @@ struct EventCardView: View {
                 } label: {
                     Image(systemName: isFavorited ? "bookmark.fill" : "bookmark")
                         .scaleEffect(isFavorited ? 1.15 : 1.0)
-                      
+                        .modifier(CardIconModifier()) //maybe delete
                         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFavorited)
                 }
             }

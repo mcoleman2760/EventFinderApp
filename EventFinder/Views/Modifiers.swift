@@ -15,10 +15,16 @@ extension View {
 }
 
 struct CardIconModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
     func body(content: Content) -> some View {
         content
             .padding(6)
-            .background(Color(white: 0.95))
+            .background(
+                Circle()
+                    .fill(colorScheme == .dark ? Color(.systemGray5) : Color.gray.opacity(0.1))
+            )
             .clipShape(Circle())
     }
 }
+

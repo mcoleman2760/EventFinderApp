@@ -5,6 +5,8 @@ import NetworkingKit
 struct RootView: View {
     @EnvironmentObject private var deepLinkHandler: DeepLinkHandler
     @Environment(\.modelContext) private var context
+  @AppStorage("isDarkMode") private var isDarkMode = false
+
 
     var body: some View {
         TabView {
@@ -16,7 +18,8 @@ struct RootView: View {
           SettingsView()
                   .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
-      
+        .preferredColorScheme(isDarkMode ? .dark : .light) // <- global
+
         .onChange(of: deepLinkHandler.pendingEventId) { oldValue, newValue in
             guard let id = newValue else { return }
             Task {

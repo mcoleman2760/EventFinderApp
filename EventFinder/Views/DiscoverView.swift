@@ -1,4 +1,3 @@
-// Views/DiscoverView.swift
 import SwiftUI
 import SwiftData
 import Combine
@@ -54,13 +53,14 @@ struct DiscoverView: View {
                         .padding(.horizontal)
                 }
                 
-                // MARK: Events Grid
+                // MARK: Events Grid with animation
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(searchVM.events) { event in
                             NavigationLink(value: event) {
                                 if let scheduleVM = scheduleVMHolder.vm {
                                     EventCardView(event: event, scheduleVM: scheduleVM)
+                                        .transition(.scale.combined(with: .opacity)) // animate appearance
                                 } else {
                                     ProgressView()
                                         .frame(height: 150)
@@ -69,7 +69,8 @@ struct DiscoverView: View {
                         }
                     }
                     .padding()
-                    .animation(.easeOut(duration: 0.3), value: searchVM.events)
+                    // Animate changes to the events array
+                    .animation(.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 0.5), value: searchVM.events)
                 }
             }
             .navigationTitle("EventFinder")
@@ -77,7 +78,6 @@ struct DiscoverView: View {
                 EventDetailView(event: event)
             }
             .onAppear {
-                // Initialize ScheduleViewModel before rendering EventCardViews
                 if scheduleVMHolder.vm == nil {
                     scheduleVMHolder.vm = ScheduleViewModel(context: modelContext)
                 }
