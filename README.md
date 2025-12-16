@@ -55,54 +55,21 @@ let ticketmasterAPIKey = "YOUR_API_KEY"
 
 
 Build and run on a simulator or device.
-
-### **🌐 Ticketmaster API**
+---
+### 🌐 Ticketmaster API
 
 This app uses the Ticketmaster Discovery API to fetch event data.
 
 Website: https://developer.ticketmaster.com/
 
 You must register for a free API key.
-
-🪟 Glass UI Compatibility
-
-EventFinder uses modern SwiftUI features like glassEffect when available:
-
-iOS 26+ → Glass UI enabled
-
-Older iOS versions → Automatic fallback to native materials
-
-This ensures the app looks great without breaking compatibility.
-
-📂 Project Structure
-EventFinder
-├── Models
-├── Views
-├── ViewModels
-├── Networking
-└── Utilities
-
-🧪 Known Limitations
-
-Event availability depends on Ticketmaster data
-
-Location-based filtering may vary by region
-
-🗺️ Future Improvements
-
-🔔 Event reminders & notifications
-
-🧭 Map-based event browsing
-
-🔐 User accounts & cloud sync
-
-🎟️ Ticket purchasing deep links
+---
 
 📄 License
 
 This project is for educational and personal use.
 Ticketmaster data is subject to their terms of service.
-
+---
 👤 Author
 
 Created by Michael Coleman
