@@ -56,7 +56,7 @@ let ticketmasterAPIKey = "YOUR_API_KEY"
 
 Build and run on a simulator or device.
 
-🌐 Ticketmaster API
+### **🌐 Ticketmaster API**
 
 This app uses the Ticketmaster Discovery API to fetch event data.
 
