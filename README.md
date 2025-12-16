@@ -64,12 +64,12 @@ Website: https://developer.ticketmaster.com/
 You must register for a free API key.
 ---
 
-📄 License
+##📄 License
 
 This project is for educational and personal use.
 Ticketmaster data is subject to their terms of service.
 ---
-👤 Author
+##👤 Author
 
 Created by Michael Coleman
 
