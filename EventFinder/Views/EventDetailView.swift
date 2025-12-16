@@ -8,8 +8,8 @@ struct EventDetailView: View {
     @StateObject private var vm: EventDetailViewModel
     @Environment(\.modelContext) private var context
 
-    // We'll hold a view model for schedule tasks
-    @StateObject private var scheduleVMHolder = ScheduleVMHolder()
+    // Holder for schedule tasks (view-owned state)
+    @State private var scheduleVMHolder = ScheduleVMHolder()
 
     init(event: TMEvent) {
         _vm = StateObject(wrappedValue: EventDetailViewModel(event: event))
@@ -18,12 +18,16 @@ struct EventDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+
                 AsyncImage(url: vm.event.images?.first?.url) { phase in
                     switch phase {
                     case .empty:
                         Color.gray.frame(height: 220)
                     case .success(let img):
-                        img.resizable().scaledToFill().frame(height: 220).clipped()
+                        img.resizable()
+                            .scaledToFill()
+                            .frame(height: 220)
+                            .clipped()
                     case .failure:
                         Color.gray.frame(height: 220)
                     @unknown default:
@@ -31,22 +35,32 @@ struct EventDetailView: View {
                     }
                 }
 
-                Text(vm.event.name).font(.title2).bold().padding(.horizontal)
+                Text(vm.event.name)
+                    .font(.title2)
+                    .bold()
+                    .padding(.horizontal)
 
                 HStack {
                     VStack(alignment: .leading) {
                         Text("Date")
-                            .font(.caption).foregroundColor(.secondary)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                         Text(vm.event.dates.start.localDate ?? "--")
                     }
                     Spacer()
-                    if let attractionNames = vm.event.attractions?.compactMap({ $0.name }).joined(separator: ", ") {
+                    if let attractionNames = vm.event.attractions?
+                        .compactMap({ $0.name })
+                        .joined(separator: ", ") {
                         VStack(alignment: .leading) {
-                            Text("Artists").font(.caption).foregroundColor(.secondary)
-                            Text(attractionNames).lineLimit(1)
+                            Text("Artists")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(attractionNames)
+                                .lineLimit(1)
                         }
                     }
-                }.padding(.horizontal)
+                }
+                .padding(.horizontal)
 
                 Divider()
 
@@ -56,7 +70,9 @@ struct EventDetailView: View {
                         Text(venue.name)
                         if let addr = venue.address?.line1 { Text(addr) }
                         if let city = venue.city?.name { Text(city) }
-                        if let postal = venue.postalCode { Text("Postal: \(postal)") }
+                        if let postal = venue.postalCode {
+                            Text("Postal: \(postal)")
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 6)
@@ -65,57 +81,75 @@ struct EventDetailView: View {
                        let lonStr = venue.location?.longitude,
                        let lat = Double(latStr),
                        let lon = Double(lonStr) {
-                        MapView(coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon))
-                            .frame(height: 200)
-                            .cornerRadius(12)
-                            .padding(.horizontal)
+                        MapView(
+                            coordinate: CLLocationCoordinate2D(
+                                latitude: lat,
+                                longitude: lon
+                            )
+                        )
+                        .frame(height: 200)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
                 } else {
-                    if vm.isLoadingVenue { ProgressView().padding() }
-                    else { Text("Venue info not available").padding(.horizontal) }
+                    if vm.isLoadingVenue {
+                        ProgressView().padding()
+                    } else {
+                        Text("Venue info not available")
+                            .padding(.horizontal)
+                    }
                 }
 
-              HStack {
-                  Button {
-                      // Initialize ScheduleViewModel if not already
-                      if scheduleVMHolder.vm == nil {
-                          scheduleVMHolder.vm = ScheduleViewModel(context: context)
-                      }
+                HStack {
+                    Button {
+                        if scheduleVMHolder.vm == nil {
+                            scheduleVMHolder.vm =
+                                ScheduleViewModel(context: context)
+                        }
+                        scheduleVMHolder.vm?.toggle(event: vm.event)
+                    } label: {
+                        let isSaved =
+                            scheduleVMHolder.vm?.isSaved(vm.event) ?? false
+                        Label(
+                            "Save Event",
+                            systemImage: isSaved
+                                ? "bookmark.fill"
+                                : "bookmark"
+                        )
+                        .padding()
+                        .background(
+                            isSaved
+                                ? Color.blue
+                                : Color.gray.opacity(0.3)
+                        )
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
 
-                      // Toggle save
-                      scheduleVMHolder.vm?.toggle(event: vm.event)
-                  } label: {
-                      let isSaved = scheduleVMHolder.vm?.isSaved(vm.event) ?? false
-                      Label("Save Event", systemImage: isSaved ? "bookmark.fill" : "bookmark")
-                          .padding()
-                          .background(isSaved ? Color.blue : Color.gray.opacity(0.3))
-                          .foregroundColor(.white)
-                          .cornerRadius(10)
-                  }
+                    Spacer()
 
-                  Spacer()
-
-                  if let url = vm.event.url {
-                      Link(destination: url) {
-                          Label("Buy Tickets", systemImage: "ticket")
-                              .padding()
-                              .background(.green)
-                              .foregroundColor(.white)
-                              .cornerRadius(10)
-                      }
-                  }
-              }
-
+                    if let url = vm.event.url {
+                        Link(destination: url) {
+                            Label("Buy Tickets", systemImage: "ticket")
+                                .padding()
+                                .background(.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                }
                 .padding(.horizontal)
             }
-            .onAppear { Task { await vm.loadFullEvent() } }
+            .onAppear {
+                Task { await vm.loadFullEvent() }
+            }
         }
         .navigationTitle("Event")
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // small holder to avoid creating ScheduleViewModel in init (needs ModelContext)
-    private final class ScheduleVMHolder: ObservableObject {
-        @Published var vm: ScheduleViewModel? = nil
+    // Small holder to avoid creating ScheduleViewModel in init
+    private final class ScheduleVMHolder {
+        var vm: ScheduleViewModel? = nil
     }
 }

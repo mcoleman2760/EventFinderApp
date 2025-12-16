@@ -20,7 +20,13 @@ struct SettingsView: View {
 
                 // ℹ️ About Section
                 Section(header: Text("About")) {
-                    Label("EventFinder v1.0", systemImage: "ticket.fill")
+                  Label {
+                      Text("EventFinder v1.0")
+                  } icon: {
+                      Image(systemName: "ticket.fill")
+                      .modifier(CardIconModifier())
+                          
+                  }
                     Text("Discover concerts and events near you using Ticketmaster’s Discovery API.")
                         .font(.footnote)
                         .foregroundColor(.secondary)

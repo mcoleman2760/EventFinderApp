@@ -23,6 +23,7 @@ struct ScheduleView: View {
                     .padding()
                     .background(.ultraThinMaterial)
                     .cornerRadius(12)
+                    .glassEffect(.regular.tint(.blue).interactive())
                 }
                 .onDelete(perform: deleteItems)
             }

@@ -11,14 +11,18 @@ struct RootView: View {
     var body: some View {
         TabView {
             DiscoverView()
+            
                 .tabItem { Label("Discover", systemImage: "magnifyingglass.circle") }
 
           ScheduleView()
+            
                 .tabItem { Label("Schedule", systemImage: "bookmark") }
           SettingsView()
                   .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
+      
         .preferredColorScheme(isDarkMode ? .dark : .light) // <- global
+        
 
         .onChange(of: deepLinkHandler.pendingEventId) { oldValue, newValue in
             guard let id = newValue else { return }
