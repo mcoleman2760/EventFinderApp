@@ -13,11 +13,6 @@ EventFinder is a SwiftUI iOS app that helps users discover concerts and live eve
 - 🎨 Modern SwiftUI design  
 - 🪟 Optional Glass UI effects on newer iOS versions (with graceful fallback)  
 
----
-
-## 📱 Screenshots
-
-*(Add screenshots here once available)*
 
 ---
 
