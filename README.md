@@ -38,7 +38,6 @@ EventFinder is a SwiftUI iOS app that helps users discover concerts and live eve
 
 1. Clone the repository:
 
-```bash
 git clone https://github.com/your-username/EventFinder.git
 
 
