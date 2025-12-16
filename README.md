@@ -54,7 +54,7 @@ Build and run on a simulator or device
 This app uses the Ticketmaster Discovery API to fetch event data.
 
 Website: https://developer.ticketmaster.com/
-You must register for a free API key
+
 
 
 ---
