@@ -38,7 +38,7 @@ EventFinder is a SwiftUI iOS app that helps users discover concerts and live eve
 
 1. Clone the repository:
 
-git clone https://github.com/your-username/EventFinder.git
+git clone https://github.com/mcoleman2760/EventFinderApp.git
 
 
 
@@ -46,28 +46,24 @@ Open the project in Xcode:
 
 open EventFinder.xcodeproj
 
+Build and run on a simulator or device
 
-Add your Ticketmaster API key
-Create a constants file or environment variable:
-
-let ticketmasterAPIKey = "YOUR_API_KEY"
-
-
-Build and run on a simulator or device.
 ---
 ### 🌐 Ticketmaster API
 
 This app uses the Ticketmaster Discovery API to fetch event data.
 
 Website: https://developer.ticketmaster.com/
+You must register for a free API key
 
-You must register for a free API key.
+
 ---
 
 ##📄 License
-
-This project is for educational and personal use.
+This project is for educational and personal use. 
 Ticketmaster data is subject to their terms of service.
+
+
 ---
 ##👤 Author
 
