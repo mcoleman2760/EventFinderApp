@@ -8,21 +8,19 @@ EventFinder is a SwiftUI iOS app that helps users discover concerts and live eve
 
 - 🔍 Discover concerts and events near you  
 - 📍 View venue name and event date  
-- ❤️ Save events for quick access  
-- 🗑️ Delete saved events with swipe gestures  
-- 🎨 Modern SwiftUI design  
-- 🪟 Optional Glass UI effects on newer iOS versions (with graceful fallback)  
+- ❤️ Save and delete events to personal calendar for quick access  
+- 🎨 Modern SwiftUI design   
 
 
 ---
 
 ## 🛠️ Tech Stack
 
-- SwiftUI  
+- SwiftUI
+- Xcode
 - iOS  
 - Ticketmaster Discovery API  
-- MVVM-style architecture  
-- Swift concurrency / async networking (if applicable)  
+
 
 ---
 
@@ -31,7 +29,7 @@ EventFinder is a SwiftUI iOS app that helps users discover concerts and live eve
 ### Requirements
 
 - Xcode 15+  
-- iOS 15+ (Glass effects enabled on iOS 26+)  
+- iOS 26+ 
 - A Ticketmaster API key  
 
 ### Installation
